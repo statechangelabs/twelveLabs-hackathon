@@ -2,21 +2,20 @@ import { FC, Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { Formik, Form, Field } from "formik";
 import { MusicalNoteIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import "plyr-react/plyr.css";
-import Plyr, { PlyrInstance, usePlyr } from "plyr-react";
+import Plyr, { PlyrInstance } from "plyr-react";
 import { Dialog, Transition } from "@headlessui/react";
 import AudioPlayer from "react-audio-player";
 import music from "./assets/waitmusic.mp3";
 const searchURL = "https://api.statechange.ai/api:3JtXDKzd/search";
 const Home: FC = () => {
   const [results, setResults] = useState([] as any[]);
-  const audioRef = useRef<{ audioEl: HTMLAudioElement }>(null);
+  const audioRef = useRef<{ audioEl: { current: HTMLAudioElement } }>(null);
   const [pauseMusic, setPauseMusic] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   useEffect(() => {
     if (pauseMusic) {
-      audioRef.current?.audioEl.current?.pause();
+      audioRef.current?.audioEl?.current?.pause();
     } else {
-      audioRef.current?.audioEl.current?.play();
+      audioRef.current?.audioEl?.current?.play();
     }
   }, [pauseMusic]);
   const search = useCallback(async (query: string) => {
@@ -37,7 +36,7 @@ const Home: FC = () => {
   const [started, setStarted] = useState(false);
   return (
     <div className="">
-      <AudioPlayer src={music} ref={audioRef} />
+      <AudioPlayer src={music} ref={audioRef as any} />
       <div className="z-10">
         <div>
           <div className="p-10  rounded-md text-7xl font-extrabold text-center text-red-500">
@@ -85,6 +84,7 @@ const Home: FC = () => {
                 }}
                 onSubmit={async (values, form) => {
                   form.setSubmitting(true);
+
                   setResults([]);
                   console.log("ref is ", audioRef.current);
 
@@ -196,7 +196,7 @@ const Results: FC<{ results: unknown[]; audioRef: any }> = ({
           {/* {plyrInfo} */}
           {plyrInfo && (
             <Plyr
-              ref={plyrRef}
+              ref={plyrRef as any}
               source={{
                 type: "video",
                 sources: [{ src: plyrInfo.file_url, type: "video/mp4" }],
