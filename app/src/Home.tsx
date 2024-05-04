@@ -1,7 +1,6 @@
 import { FC, Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { Formik, Form, Field } from "formik";
 import {
-  MinusIcon,
   MusicalNoteIcon,
   PlayIcon,
   ShareIcon,
@@ -241,7 +240,7 @@ const Results: FC<{
   pauseMusic: boolean;
 }> = ({ results, audioRef, pauseMusic }) => {
   console.log("Starting results");
-  const [selected, setSelected] = useState([]);
+  const [selected, setSelected] = useState<any[]>([]);
   useEffect(() => {
     setSelected([]);
   }, [results]);
@@ -252,7 +251,7 @@ const Results: FC<{
   };
   const plyrRef = useRef<{ plyr: PlyrInstance }>();
   const loopEnabledRef = useRef(false);
-  const [loopEnabled, setLoopEnabled] = useState(true);
+  const [loopEnabled] = useState(true);
   useEffect(() => {
     loopEnabledRef.current = loopEnabled;
   }, [loopEnabled]);
