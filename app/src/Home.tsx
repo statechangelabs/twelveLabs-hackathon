@@ -5,7 +5,15 @@ import "plyr-react/plyr.css";
 import Plyr, { PlyrInstance } from "plyr-react";
 import { Dialog, Transition } from "@headlessui/react";
 import AudioPlayer from "react-audio-player";
-import music from "./assets/waitmusic.mp3";
+import song1 from "./assets/song1.mp3";
+import song2 from "./assets/song2.mp3";
+import song3 from "./assets/song3.mp3";
+import song4 from "./assets/song4.mp3";
+import song5 from "./assets/song5.mp3";
+import song6 from "./assets/song6.mp3";
+
+const sources = [song1, song2, song3, song4, song5, song6];
+const thisSong = sources[Math.floor(Math.random() * sources.length)];
 const searchURL = "https://api.statechange.ai/api:3JtXDKzd/search";
 const Home: FC = () => {
   const [results, setResults] = useState([] as any[]);
@@ -36,14 +44,42 @@ const Home: FC = () => {
   const [started, setStarted] = useState(false);
   return (
     <div className="">
-      <AudioPlayer src={music} ref={audioRef as any} />
+      <AudioPlayer src={thisSong} ref={audioRef as any} />
       <div className="z-10">
         <div>
-          <div className="p-10  rounded-md text-7xl font-extrabold text-center text-red-500">
-            Chessboxing AI Clips
+          <div className="p-10 bg-opacity-30 bg-black rounded-md text-7xl font-extrabold  text-red-500 justify-around flex flex-row">
+            <div>
+              <div>Chessboxing AI Clips</div>
+              <div className="text-xl font-medium text-green-200 mt-2">
+                Powered By{" "}
+                <a
+                  href="https://twelvelabs.io"
+                  className="text-blue-300 hover:text-blue-500"
+                >
+                  Twelve Labs
+                </a>{" "}
+                Video Insights. A{" "}
+                <a
+                  href="https://statechange.ai"
+                  className="text-blue-300 hover:text-blue-500"
+                >
+                  State Change
+                </a>{" "}
+                Experiment
+              </div>
+            </div>
+            {started && (
+              <button
+                className="my-auto h-12 text-sm bg-blue-500 hover:bg-blue-800 text-white p-2 px-4 rounded-md"
+                onClick={() => setPauseMusic(!pauseMusic)}
+              >
+                <MusicalNoteIcon className="h-8 w-8 inline mr-2" />
+                {pauseMusic ? "Play Music" : "Pause Music"}
+              </button>
+            )}
           </div>
           {!started && (
-            <div className="flex flex-row justify-center">
+            <div className="flex flex-row justify-center mt-10">
               <button
                 className="text-2xl font-bold bg-blue-500 hover:bg-blue-800 text-white p-5 rounded-md animated-all duration-200"
                 onClick={() => {
@@ -65,13 +101,6 @@ const Home: FC = () => {
           leaveTo="opacity-0"
         >
           <div>
-            <button
-              className="ml-10 bg-blue-500 hover:bg-blue-800 text-white p-2 px-4 rounded-md"
-              onClick={() => setPauseMusic(!pauseMusic)}
-            >
-              <MusicalNoteIcon className="h-8 w-8 inline mr-2" />
-              {pauseMusic ? "Play Music" : "Pause Music"}
-            </button>
             <div className="bg-opacity-80 bg-white m-10 p-5 gap-y-2 flex-col flex rounded-lg">
               <Formik
                 initialValues={{ search: "" }}
@@ -133,7 +162,13 @@ const Home: FC = () => {
                 )}
               </Formik>
             </div>
-            {!!results && <Results results={results} audioRef={audioRef} />}
+            {!!results && (
+              <Results
+                results={results}
+                audioRef={audioRef}
+                pauseMusic={pauseMusic}
+              />
+            )}
           </div>
         </Transition>
       </div>
@@ -144,10 +179,11 @@ const Home: FC = () => {
     </div>
   );
 };
-const Results: FC<{ results: unknown[]; audioRef: any }> = ({
-  results,
-  audioRef,
-}) => {
+const Results: FC<{
+  results: unknown[];
+  audioRef: any;
+  pauseMusic: boolean;
+}> = ({ results, audioRef, pauseMusic }) => {
   console.log("Starting results");
 
   const [plyrInfo, setPlyrInfo] = useState<any | undefined>(undefined);
@@ -177,7 +213,7 @@ const Results: FC<{ results: unknown[]; audioRef: any }> = ({
         });
       }, 2000);
     } else {
-      if (audioRef.current?.audioEl.current?.paused)
+      if (audioRef.current?.audioEl.current?.paused && !pauseMusic)
         audioRef.current?.audioEl.current?.play();
     }
   }, [plyrInfo]);
@@ -213,7 +249,7 @@ const Results: FC<{ results: unknown[]; audioRef: any }> = ({
         {results.map((result: any) => (
           <li
             key={result.video_id + result.start.toString()}
-            className="relative"
+            className="relative bg-white rounded-lg shadow-lg p-5 overflow-hidden bg-opacity-80 bg-gray-100 hover:bg-opacity-100 animated-all duration-200 group"
           >
             <div
               className="group aspect-h-7 aspect-w-10 block w-full overflow-hidden rounded-lg bg-gray-100 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-100"
@@ -221,6 +257,10 @@ const Results: FC<{ results: unknown[]; audioRef: any }> = ({
                 showPlyr(result);
               }}
             >
+              {" "}
+              <div className="hidden group-hover:block absolute text-white ">
+                Hello there
+              </div>
               <img
                 src={result.thumbnail_url}
                 alt=""
@@ -239,7 +279,10 @@ const Results: FC<{ results: unknown[]; audioRef: any }> = ({
               {result.filename}
             </p>
             <p className="pointer-events-none block text-sm font-medium text-gray-500">
-              {result.score.toFixed(0)}%
+              Duration: {(result.end - result.start).toFixed(2)}s{" "}
+            </p>{" "}
+            <p className="pointer-events-none block text-sm font-medium text-gray-500">
+              Confidence: {result.confidence} ({result.score.toFixed(0)}%)
             </p>
           </li>
         ))}
