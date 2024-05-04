@@ -65,17 +65,31 @@ const Home: FC = () => {
                 >
                   State Change
                 </a>{" "}
-                Experiment
+                Contribution to Society
               </div>
             </div>
             {started && (
-              <button
-                className="my-auto h-12 text-sm bg-blue-500 hover:bg-blue-800 text-white p-2 px-4 rounded-md"
-                onClick={() => setPauseMusic(!pauseMusic)}
-              >
-                <MusicalNoteIcon className="h-8 w-8 inline mr-2" />
-                {pauseMusic ? "Play Music" : "Pause Music"}
-              </button>
+              <div className="flex flex-col gap-y-2">
+                <button
+                  className="block w-full my-auto h-12 text-sm bg-blue-500 hover:bg-blue-800 text-white p-2 px-4 rounded-md"
+                  onClick={() => setPauseMusic(!pauseMusic)}
+                >
+                  <MusicalNoteIcon className="h-8 w-8 inline mr-2" />
+                  {pauseMusic ? "Play Music" : "Pause Music"}
+                </button>
+                <button
+                  className="block w-full my-auto h-12 text-sm bg-blue-500 hover:bg-blue-800 text-white p-2 px-4 rounded-md"
+                  onClick={() => {
+                    if (audioRef.current?.audioEl.current)
+                      audioRef.current.audioEl.current.src =
+                        sources[Math.floor(Math.random() * sources.length)];
+                    if (!pauseMusic) audioRef.current?.audioEl.current?.play();
+                  }}
+                >
+                  <MusicalNoteIcon className="h-8 w-8 inline mr-2" />
+                  Change Song
+                </button>
+              </div>
             )}
           </div>
           {!started && (
@@ -185,7 +199,7 @@ const Results: FC<{
   pauseMusic: boolean;
 }> = ({ results, audioRef, pauseMusic }) => {
   console.log("Starting results");
-
+  const [selected, setSelected] = useState([]);
   const [plyrInfo, setPlyrInfo] = useState<any | undefined>(undefined);
   const showPlyr = (info: any) => {
     setPlyrInfo(info);
@@ -244,7 +258,7 @@ const Results: FC<{
       </Dialog>
       <ul
         role="list"
-        className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4 xl:gap-x-8"
+        className="mx-10 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4 xl:gap-x-8"
       >
         {results.map((result: any) => (
           <li
