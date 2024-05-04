@@ -2,6 +2,7 @@ from glob import glob
 import os
 from dotenv import load_dotenv
 import requests
+import sys
 
 # Assuming TwelveLabs and Task are correctly imported as before
 from twelvelabs import TwelveLabs
@@ -13,7 +14,8 @@ load_dotenv()
 client = TwelveLabs(api_key=os.getenv("TL_API_KEY"))
 API_KEY = os.getenv("TL_API_KEY")
 INDEX_ID = os.getenv("TL_INDEX")
-
+# print("Index id:", INDEX_ID)
+# sys.exit(0)
 # Base URL for the API request to get existing filenames
 base_url = f"https://api.twelvelabs.io/v1.1/indexes/{INDEX_ID}/videos"
 

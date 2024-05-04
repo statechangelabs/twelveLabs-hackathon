@@ -28,8 +28,8 @@ def get_filenames_from_page(page):
     response = requests.get(base_url, headers=headers, params=params)
     if response.status_code == 200:
         data = response.json()
-        filenames = [video["metadata"]["filename"] for video in data["data"]]
-        return filenames, data["page_info"]["total_page"]
+        # filenames = [video["metadata"]["filename"] for video in data["data"]]
+        return data
     else:
         raise Exception(
             f"API request failed with status code {response.status_code}: {response.text}"
