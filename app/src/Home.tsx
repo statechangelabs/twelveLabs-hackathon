@@ -217,6 +217,12 @@ const Home: FC = () => {
                         </button>
                       </div>
                     </div>
+                    {isSubmitting && (
+                      <img
+                        src={logo}
+                        className="m-5 h-20 w-20 mx-auto animate-spin rounded-full"
+                      />
+                    )}
                   </Form>
                 )}
               </Formik>
