@@ -14,8 +14,8 @@ def download_video(url, file_path):
 def upload_to_spaces(file_path, bucket_name, object_name=None):
     """Upload a file to Digital Ocean Spaces"""
     # Set the necessary parameters
-    spaces_key = 'DO00XEU3UBLGTFT9BD2Q'
-    spaces_secret = 'FgVMUIit2vkVvxlVxa2nfea2s9qPhJOV6lEwHFyL+lM'
+    spaces_key = os.getenv("ACCESS_KEY")
+    spaces_secret = os.getenv("SECRET_KEY")
     region_name = 'nyc3'  # Change to your region
     endpoint_url = 'https://nyc3.digitaloceanspaces.com'  # Change to your endpoint URL
 
@@ -109,6 +109,7 @@ def overlay_audio(video_path, audio_path, output_path):
 def process_videos(input):
     """Processes video objects to download, segment, resize, and save to 'shorts/', then deletes the original download."""
     uuid = input['id']
+    video_objects = input['videos']
     # print("uuid is:",uuid)
     temp_folder = f"temp_{uuid}/"
     # os.makedirs(temp_folder, exist_ok=True)
@@ -177,40 +178,40 @@ def process_videos(input):
     
     
 # Example usage
-video_objects = [
-    {
-        "score": 86.34,
-        "start": 1046.97,
-        "end": 1086.20,
-        "video_id": "66367f7dd1cd5a287c957c9f",
-        "file_url": "https://scl-chessboxing.nyc3.digitaloceanspaces.com/clips/MOGUL%20CHESSBOXING%20CHAMPIONSHIP%20PRESENTED%20BY%20FANSLY%20%EF%BD%9C%20%21FANSLY%20%23FANSLYPARTNER_Fiction%20vs%20KJH_chapter_3_part_1.mp4",
-        "filename": "MOGUL CHESSBOXING CHAMPIONSHIP PRESENTED BY FANSLY ｜ !FANSLY #FANSLYPARTNER_Fiction vs KJH_chapter_3_part_1.mp4"
-    },
-    {
-        "score": 86.1,
-        "start": 661.8000000000554,
-        "end": 681.8833333333714,
-        "video_id": "66367ac1d1cd5a287c957c96",
-        "file_url": "https://scl-chessboxing.nyc3.digitaloceanspaces.com/clips/Highest%20Elo%20Rated%20Chessboxing%20Match%20of%20All%20Time_part_1.mp4",
-        "filename": "Highest Elo Rated Chessboxing Match of All Time_part_1.mp4"
-    },
-    {
-        "score": 86.08,
-        "start": 260.0666666666579,
-        "end": 304.78333333335934,
-        "video_id": "663689b8d1cd5a287c957cb2",
-        "file_url": "https://scl-chessboxing.nyc3.digitaloceanspaces.com/clips/MOGUL%20CHESSBOXING%20CHAMPIONSHIP%20PRESENTED%20BY%20FANSLY%20%EF%BD%9C%20%21FANSLY%20%23FANSLYPARTNER_Fiction%20vs%20KJH_chapter_3_part_2.mp4",
-        "filename": "MOGUL CHESSBOXING CHAMPIONSHIP PRESENTED BY FANSLY ｜ !FANSLY #FANSLYPARTNER_Fiction vs KJH_chapter_3_part_2.mp4"
-    },
-]
+# video_objects = [
+#     {
+#         "score": 86.34,
+#         "start": 1046.97,
+#         "end": 1086.20,
+#         "video_id": "66367f7dd1cd5a287c957c9f",
+#         "file_url": "https://scl-chessboxing.nyc3.digitaloceanspaces.com/clips/MOGUL%20CHESSBOXING%20CHAMPIONSHIP%20PRESENTED%20BY%20FANSLY%20%EF%BD%9C%20%21FANSLY%20%23FANSLYPARTNER_Fiction%20vs%20KJH_chapter_3_part_1.mp4",
+#         "filename": "MOGUL CHESSBOXING CHAMPIONSHIP PRESENTED BY FANSLY ｜ !FANSLY #FANSLYPARTNER_Fiction vs KJH_chapter_3_part_1.mp4"
+#     },
+#     {
+#         "score": 86.1,
+#         "start": 661.8000000000554,
+#         "end": 681.8833333333714,
+#         "video_id": "66367ac1d1cd5a287c957c96",
+#         "file_url": "https://scl-chessboxing.nyc3.digitaloceanspaces.com/clips/Highest%20Elo%20Rated%20Chessboxing%20Match%20of%20All%20Time_part_1.mp4",
+#         "filename": "Highest Elo Rated Chessboxing Match of All Time_part_1.mp4"
+#     },
+#     {
+#         "score": 86.08,
+#         "start": 260.0666666666579,
+#         "end": 304.78333333335934,
+#         "video_id": "663689b8d1cd5a287c957cb2",
+#         "file_url": "https://scl-chessboxing.nyc3.digitaloceanspaces.com/clips/MOGUL%20CHESSBOXING%20CHAMPIONSHIP%20PRESENTED%20BY%20FANSLY%20%EF%BD%9C%20%21FANSLY%20%23FANSLYPARTNER_Fiction%20vs%20KJH_chapter_3_part_2.mp4",
+#         "filename": "MOGUL CHESSBOXING CHAMPIONSHIP PRESENTED BY FANSLY ｜ !FANSLY #FANSLYPARTNER_Fiction vs KJH_chapter_3_part_2.mp4"
+#     },
+# ]
 
-import uuid
+# import uuid
 
-input = {
-    "id": uuid.uuid4(),
-    "videos": video_objects,
-    "audio": "Checkmate Chaos.mp3",
-}
+# input = {
+#     "id": uuid.uuid4(),
+#     "videos": video_objects,
+#     "audio": "Checkmate Chaos.mp3",
+# }
 
 # print(input)
 # process_videos(input)
