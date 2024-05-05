@@ -334,7 +334,10 @@ const Results: FC<{
         onClose={() => setPlyrInfo(undefined)}
         className="fixed top-0 left-0 bg-black bg-opacity-50 w-screen h-screen z-50"
       >
-        <Dialog.Panel className="m-20 p-10 rounded-lg bg-white">
+        <Dialog.Panel
+          className="m-20 p-10 rounded-lg bg-white max-h-screen"
+          style={{ maxHeight: "70%" }}
+        >
           <div className="flex flex-row justify-between">
             <Dialog.Title className="text-2xl font-bold">
               Clip Preview
@@ -346,7 +349,7 @@ const Results: FC<{
               <XMarkIcon className="h-8 w-8 inline mr-2" />
             </button>
           </div>
-          {plyrInfo?.filename}
+
           {/* <Dialog.Description>
           This will permanently deactivate your account
         </Dialog.Description> */}
@@ -360,6 +363,7 @@ const Results: FC<{
                 type: "video",
                 sources: [{ src: plyrInfo.file_url, type: "video/mp4" }],
               }}
+              style={{ width: "80%" }}
               options={{}}
             />
           )}
