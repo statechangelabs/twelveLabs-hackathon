@@ -1,0 +1,8 @@
+.venv/
+downloaded/
+clips/
+.env
+.hypothesis/
+.env.notused
+*.mp4
+*.mp3
