@@ -23,6 +23,8 @@ import logo from "./logo.png";
 const sources = [song1, song2, song3, song4, song5, song6];
 const thisSong = sources[Math.floor(Math.random() * sources.length)];
 const searchURL = "https://api.statechange.ai/api:3JtXDKzd/search";
+const makeURL = "https://api.statechange.ai/api:3JtXDKzd/make";
+const checkURL = "https://api.statechange.ai/api:3JtXDKzd/check";
 const Home: FC = () => {
   const [results, setResults] = useState([] as any[]);
   const audioRef = useRef<{ audioEl: { current: HTMLAudioElement } }>(null);
@@ -49,7 +51,8 @@ const Home: FC = () => {
       setResults(data);
     }
   }, []);
-  const [started, setStarted] = useState(false);
+  const params = new URLSearchParams(window.location.search);
+  const [started, setStarted] = useState(params.get("uuid") ? true : false);
   return (
     <div className="">
       <AudioPlayer src={thisSong} ref={audioRef as any} />
@@ -161,12 +164,17 @@ const Home: FC = () => {
                       exciting clips that showcase your interest in the sport.
                       How about{" "}
                       <button
+                        type="button"
                         className="text-blue-500 hover:text-blue-800"
-                        onClick={() => setFieldValue("search", "knockouts")}
+                        onClick={() => {
+                          console.log("Helo there");
+                          setFieldValue("search", "knockouts");
+                        }}
                       >
                         Knockouts?
                       </button>{" "}
                       <button
+                        type="button"
                         className="text-blue-500 hover:text-blue-800"
                         onClick={() => setFieldValue("search", "checkmates")}
                       >
@@ -174,6 +182,7 @@ const Home: FC = () => {
                       </button>{" "}
                       Maybe you prefer{" "}
                       <button
+                        type="button"
                         className="text-blue-500 hover:text-blue-800"
                         onClick={() =>
                           setFieldValue("search", "cannot play chess")
@@ -227,13 +236,12 @@ const Home: FC = () => {
                 )}
               </Formik>
             </div>
-            {!!results && (
-              <Results
-                results={results}
-                audioRef={audioRef}
-                pauseMusic={pauseMusic}
-              />
-            )}
+
+            <Results
+              results={results}
+              audioRef={audioRef}
+              pauseMusic={pauseMusic}
+            />
           </div>
         </Transition>
       </div>
@@ -294,6 +302,31 @@ const Results: FC<{
     }
   }, [plyrInfo, audioRef, pauseMusic]);
   const [showShare, setShowShare] = useState(false);
+  const params = new URLSearchParams(window.location.search);
+  const [fetching, setFetching] = useState(!!params.get("uuid"));
+  const [uuid, setUUID] = useState<string | undefined>(
+    params.get("uuid") || undefined
+  );
+  const [fetchedVideo, setFetchedVideo] = useState<any>(undefined);
+  useEffect(() => {
+    if (uuid) {
+      const interval = setInterval(async () => {
+        const response = await fetch(checkURL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uuid }),
+        });
+        const json = await response.json();
+        console.log(json);
+        if (json.url) {
+          setFetchedVideo(json);
+          setFetching(false);
+          setUUID(undefined);
+        }
+      }, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [uuid]);
   return (
     <Fragment>
       <Dialog
@@ -359,8 +392,18 @@ const Results: FC<{
           <div className="flex flex-row justify-start ml-10">
             <div className="flex flex-col gap-y-4 mt-4">
               <li
-                onClick={() => {
+                onClick={async () => {
                   console.log("No music", selected);
+                  setFetching(true);
+                  setShowShare(false);
+                  const response = await fetch(makeURL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ clips: selected, music: false }),
+                  });
+                  const json = await response.json();
+                  const { uuid } = json;
+                  setUUID(uuid);
                 }}
                 className="text-blue-500 hover:text-blue-800 cursor-pointer"
               >
@@ -368,8 +411,20 @@ const Results: FC<{
                 Make Clips Without Music
               </li>
               <li
-                onClick={() => {
-                  console.log("Add Music", selected);
+                onClick={async () => {
+                  console.log(" music", selected);
+                  setFetching(true);
+                  setShowShare(false);
+                  console.log("OK here we go");
+                  const response = await fetch(makeURL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ clips: selected, music: true }),
+                  });
+                  const json = await response.json();
+                  const { uuid } = json;
+                  console.log("What I got back was", json);
+                  setUUID(uuid);
                 }}
                 className="text-blue-500 hover:text-blue-800 cursor-pointer"
               >
@@ -392,85 +447,169 @@ const Results: FC<{
           <div className="flex flex-row justify-center"></div>
         </Dialog.Panel>
       </Dialog>
-      <div className="my-10 bg-opacity-80 bg-black p-10">
-        {!!selected.length && (
-          <div className="text-white text-2xl font-bold">
-            Results!{" "}
-            <span className="font-medium text-lg">
-              Hover over a found clip below. Click the{" "}
-              <PlayIcon className="inline h-5 w-5" />
-              <span className="font-bold">Play</span> button to preview the clip
-              in the context of the match, and{" "}
-              <ShareIcon className="inline h-5 w-5" />
-              <span className="font-bold">Share</span> to build a list of
-              highlights to share on social media!
-            </span>
+      <Dialog
+        open={!!fetching}
+        onClose={() => {
+          console.log("this is unkillable");
+        }}
+        className="fixed top-0 left-0 bg-black bg-opacity-50 w-screen h-screen z-50"
+      >
+        <Dialog.Panel className="p-10 rounded-lg bg-white m-20 ">
+          <div className="flex flex-row justify-between">
+            <Dialog.Title className="text-2xl font-bold">
+              Making Video
+            </Dialog.Title>
           </div>
-        )}
-        {!!selected.length && (
           <div className="flex flex-row justify-center">
-            <button
-              onClick={() => setShowShare(true)}
-              className="text-white bg-blue-500 hover:bg-blue-800 p-2 px-4 rounded-md"
+            <img
+              src={logo}
+              className="m-5 h-20 w-20 mx-auto animate-spin rounded-full"
+            />
+          </div>
+          <Dialog.Description>
+            We are making your video. This will take a minute. If you want ot
+            come back later, use this url:{" "}
+            <a
+              className="text-blue-500 hover:text-blue-800 cursor-pointer"
+              target="_blank"
+              href={window.location.href.split("?")[0] + "?uuid=" + uuid}
             >
-              Share {selected.length} Clip{selected.length > 1 && "s"}
+              {window.location.href.split("?")[0] + "?uuid=" + uuid}
+            </a>
+          </Dialog.Description>
+        </Dialog.Panel>
+      </Dialog>
+      <Dialog
+        open={!!fetchedVideo}
+        onClose={() => {
+          console.log("this is unkillable");
+        }}
+        className="fixed top-0 left-0 bg-black bg-opacity-50 w-screen h-screen z-50"
+      >
+        <Dialog.Panel className="p-10 rounded-lg bg-white m-20 ">
+          <div className="flex flex-row justify-between">
+            <Dialog.Title className="text-2xl font-bold">
+              Your Short is Ready For Sharing
+            </Dialog.Title>
+            <button
+              className="text-2xl font-bold text-blue-500 hover:text-blue-800 p-2 rounded-md  animated-all duration-200"
+              onClick={() => setFetchedVideo(undefined)}
+            >
+              <XMarkIcon className="h-8 w-8 inline mr-2" />
             </button>
           </div>
-        )}
-      </div>
-      <ul
-        role="list"
-        className="mx-10 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4 xl:gap-x-8"
-      >
-        {results.map((result: any) => (
-          <li
-            key={result.video_id + result.start.toString()}
-            className="relative bg-white rounded-lg shadow-lg p-5 overflow-hidden bg-opacity-80 bg-gray-100 hover:bg-opacity-100 animated-all duration-200 group"
-          >
-            <div className="group aspect-h-7 aspect-w-10 block w-full overflow-hidden rounded-lg bg-gray-100 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-100">
-              {" "}
-              <div
-                className="top-10 left-10 font-bold hidden group-hover:block absolute  text-2xl z-10 hover:text-blue-500"
-                onClick={() => {
-                  showPlyr(result);
-                }}
-              >
-                <PlayIcon className="h-20 w-20 inline mr-2" />
-              </div>
-              <div
-                className="right-10 top-10 font-bold hidden group-hover:block absolute text-2xl z-10 hover:text-blue-500"
-                onClick={() => {
-                  setSelected((old) => [...old, result]);
-                }}
-              >
-                <ShareIcon className="h-20 w-20 inline mr-2" />
-              </div>
-              <img
-                src={result.thumbnail_url}
-                alt=""
-                className="pointer-events-none object-cover group-hover:opacity-50"
-              />
+          <Dialog.Description>
+            Your video is ready. You can download it now.
+          </Dialog.Description>
+          <div className="flex flex-row justify-center">
+            <a
+              href={fetchedVideo?.url}
+              download
+              className="bg-blue-500 p-5 text-2xl m-5 hover:bg-blue-800 rounded-md text-white animated-all duration-200 font-bold"
+            >
+              Download My Short
+            </a>
+            {/* <video
+              src={fetchedVideo}
+              controls
+              className="mx-auto"
+              style={{ maxWidth: "90%" }}
+            /> */}
+          </div>
+        </Dialog.Panel>
+      </Dialog>
+
+      {!!results.length && (
+        <div className="my-10 bg-opacity-80 bg-black p-10">
+          {!!results.length && (
+            <div className="text-white text-2xl font-bold">
+              Results!{" "}
+              <span className="font-medium text-lg">
+                Hover over a found clip below. Click the{" "}
+                <PlayIcon className="inline h-5 w-5" />
+                <span className="font-bold">Play</span> button to preview the
+                clip in the context of the match, and{" "}
+                <ShareIcon className="inline h-5 w-5" />
+                <span className="font-bold">Share</span> to build a list of
+                highlights to share on social media!
+              </span>
+            </div>
+          )}
+          {!!selected.length && (
+            <div className="flex flex-row justify-center">
               <button
-                type="button"
-                className="absolute inset-0 focus:outline-none"
+                onClick={() => setShowShare(true)}
+                className="text-white bg-blue-500 hover:bg-blue-800 p-2 px-4 rounded-md"
               >
-                <span className="sr-only">
-                  View details for {result.filename}
-                </span>
+                Share {selected.length} Clip{selected.length > 1 && "s"}
               </button>
             </div>
-            <p className="pointer-events-none mt-2 block truncate text-sm font-medium text-gray-900">
-              {result.filename}
-            </p>
-            <p className="pointer-events-none block text-sm font-medium text-gray-500">
-              Duration: {(result.end - result.start).toFixed(2)}s{" "}
-            </p>{" "}
-            <p className="pointer-events-none block text-sm font-medium text-gray-500">
-              Confidence: {result.confidence} ({result.score.toFixed(0)}%)
-            </p>
-          </li>
-        ))}
-      </ul>
+          )}
+        </div>
+      )}
+      {!!results.length && (
+        <ul
+          role="list"
+          className="mx-10 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4 xl:gap-x-8"
+        >
+          {results.map((result: any) => (
+            <li
+              key={result.video_id + result.start.toString()}
+              className="relative bg-white rounded-lg shadow-lg p-5 overflow-hidden bg-opacity-80 bg-gray-100 hover:bg-opacity-100 animated-all duration-200 group"
+            >
+              <div className="group aspect-h-7 aspect-w-10 block w-full overflow-hidden rounded-lg bg-gray-100 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-100">
+                {" "}
+                <div
+                  className="top-10 left-10 font-bold hidden group-hover:block absolute  text-2xl z-10 hover:text-blue-500"
+                  onClick={() => {
+                    showPlyr(result);
+                  }}
+                >
+                  <PlayIcon className="h-20 w-20 inline mr-2" />
+                </div>
+                <div
+                  className="right-10 top-10 font-bold hidden group-hover:block absolute text-2xl z-10 hover:text-blue-500"
+                  onClick={() => {
+                    setSelected((old) => {
+                      if (old.find((x) => x.video_id === result.video_id)) {
+                        return old.filter(
+                          (x) => x.video_id !== result.video_id
+                        );
+                      } else {
+                        return [...old, result];
+                      }
+                    });
+                  }}
+                >
+                  <ShareIcon className="h-20 w-20 inline mr-2" />
+                </div>
+                <img
+                  src={result.thumbnail_url}
+                  alt=""
+                  className="pointer-events-none object-cover group-hover:opacity-50"
+                />
+                <button
+                  type="button"
+                  className="absolute inset-0 focus:outline-none"
+                >
+                  <span className="sr-only">
+                    View details for {result.filename}
+                  </span>
+                </button>
+              </div>
+              <p className="pointer-events-none mt-2 block truncate text-sm font-medium text-gray-900">
+                {result.filename}
+              </p>
+              <p className="pointer-events-none block text-sm font-medium text-gray-500">
+                Duration: {(result.end - result.start).toFixed(2)}s{" "}
+              </p>{" "}
+              <p className="pointer-events-none block text-sm font-medium text-gray-500">
+                Confidence: {result.confidence} ({result.score.toFixed(0)}%)
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
     </Fragment>
   );
 };
