@@ -44,6 +44,7 @@ def get_all_filenames():
 
     while page <= total_pages:
         filenames, total_pages = get_filenames_from_page(page)
+        total_pages = int(total_pages)  # Convert total_pages to an integer
         all_filenames.extend(filenames)
         page += 1
 
