@@ -18,6 +18,7 @@ import song3 from "./assets/song3.mp3";
 import song4 from "./assets/song4.mp3";
 import song5 from "./assets/song5.mp3";
 import song6 from "./assets/song6.mp3";
+import logo from "./logo.png";
 
 const sources = [song1, song2, song3, song4, song5, song6];
 const thisSong = sources[Math.floor(Math.random() * sources.length)];
@@ -56,7 +57,10 @@ const Home: FC = () => {
         <div>
           <div className="p-10 bg-opacity-30 bg-black rounded-md text-7xl font-extrabold  text-red-500 justify-around flex flex-row">
             <div>
-              <div>Chessboxing AI Clips</div>
+              <div>
+                <img className="h-16 w-16 inline mr-5 my-auto" src={logo} />
+                Chessboxing AI Clips
+              </div>
               <div className="text-xl font-medium text-green-200 mt-2">
                 Powered By{" "}
                 <a
