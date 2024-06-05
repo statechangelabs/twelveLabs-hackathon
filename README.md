@@ -23,3 +23,4 @@ The main component of the application is `Home.tsx` (referenced from `app/src/Ho
 ## Assets
 
 The project includes several assets, such as audio files for background music and a logo image. The logo image is used in various places in the application, such as the loading spinner and the header.
+
